@@ -1,25 +1,25 @@
 import tensorflow as tf
 import os
 
-# Paths
-model_path = os.path.join(os.path.dirname(__file__), '../model/quality_model.h5')
-tflite_path = os.path.join(os.path.dirname(__file__), '../model/quality_model.tflite')
+# --- PATH SETUP ---
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+model_h5_path = os.path.join(project_root, 'model', 'quality_model.h5')
+model_tflite_path = os.path.join(project_root, 'model', 'quality_model.tflite')
 
-print("Loading Keras model...")
-model = tf.keras.models.load_model(model_path)
+print(f"Loading model from: {model_h5_path}")
 
-# Convert to TensorFlow Lite
-print("Converting to TFLite...")
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
+# --- CONVERSION ---
+try:
+    model = tf.keras.models.load_model(model_h5_path)
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    tflite_model = converter.convert()
 
-# OPTIMIZATION: Quantization
-# This flag tells TF to optimize the model size (make it 4x smaller)
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    with open(model_tflite_path, 'wb') as f:
+        f.write(tflite_model)
+    
+    print(f"SUCCESS: TFLite model saved to {model_tflite_path}")
 
-tflite_model = converter.convert()
-
-# Save the TFLite model
-with open(tflite_path, 'wb') as f:
-    f.write(tflite_model)
-
-print(f"Success! TFLite model saved to {tflite_path}")
+except Exception as e:
+    print(f"ERROR: Could not convert model. {e}")
