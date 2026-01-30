@@ -1,7 +1,4 @@
-tensorflow
-pandas
-numpy
-matplotlib
+tensorflow-cpu
 streamlit
-opencv-python-headless
 pillow
+numpy
